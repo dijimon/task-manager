@@ -1,18 +1,47 @@
 // Core
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 
 // Instruments
 import Styles from './styles';
 import initialState from './todos';
 import Checkbox from 'theme/assets/Checkbox';
+import todoActions from 'actions/todo';
 
 // Components
 import Task from 'components/Task';
 
-export default class Scheduler extends Component {
-    state = initialState;
+class Scheduler extends Component {
+    constructor () {
+        super();
 
-    handleSubmit = (event) => event.preventDefault();
+        this.state = {
+            todos:    initialState.todos,
+            todoName: '',
+        };
+    }
+
+
+    handleSubmit = (event) => {
+        event.preventDefault();
+        this.createTodo();
+    }
+
+    changeTodoName = (e) => {
+        const todoName = e.target.value;
+
+        this.setState(() => ({
+            todoName,
+        }));
+    }
+
+    createTodo = () => {
+        const todoName = { id: 'qwerty', message: this.state.todoName, completed: false, favorite: false };
+
+
+        this.props.todoActions.create(todoName);
+    }
 
     complete = (id) =>
         this.setState(({ todos }) => ({
@@ -69,7 +98,7 @@ export default class Scheduler extends Component {
                     </header>
                     <section>
                         <form onSubmit = { this.handleSubmit }>
-                            <input placeholder = 'Описание моей новой задачи' type = 'text' />
+                            <input onChange = { this.changeTodoName } placeholder = 'Описание моей новой задачи' type = 'text' />
                             <button>Добавить задачу</button>
                         </form>
                         <ul>{todoList}</ul>
@@ -88,3 +117,13 @@ export default class Scheduler extends Component {
         );
     }
 }
+
+const mapStateToProps = (state) => ({
+    todos: state.todos,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+    todoActions: bindActionCreators({ ...todoActions }, dispatch),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Scheduler);
